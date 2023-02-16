@@ -48,7 +48,7 @@ class Apple extends \yii\db\ActiveRecord
      */
     public function fallToGround()
     {
-        if ($this->is_on_tree) return; # уже на земле
+        if (!$this->is_on_tree) return; # уже на земле
         $this->is_on_tree = 0;
         $this->fell_at = date('Y-m-d H:i:s', time());
         $this->save();
