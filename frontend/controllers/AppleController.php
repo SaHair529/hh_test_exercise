@@ -28,6 +28,18 @@ class AppleController extends Controller
         ]);
     }
 
+    public function actionCreate()
+    {
+        if ($this->request->isPost) {
+            $colors = ['green', 'red', 'yellow'];
+
+            $apple = new Apple([], $colors[array_rand($colors)]);
+            $apple->save();
+        }
+
+        return $this->redirect(['apple/index']);
+    }
+
     public function actionFalldown()
     {
         if ($this->request->isPost) {
@@ -36,5 +48,32 @@ class AppleController extends Controller
         }
 
         return $this->redirect(['apple/index']);
+    }
+
+    public function actionEat()
+    {
+        if ($this->request->isPost) {
+            $percent = $this->prepareValidPercent((int) $this->request->post('percent'));
+
+            $apple = Apple::findOne(['id' => $this->request->post('id')]);
+            $apple->eat($percent);
+
+            if ($apple->hasErrors('eat_error')) {
+                $errorMsg = $apple->getFirstError('eat_error');
+                \Yii::$app->session->setFlash('eat_error', $errorMsg);
+            }
+        }
+
+        return $this->redirect(['apple/index']);
+    }
+
+    private function prepareValidPercent($percent)
+    {
+        if ($percent > 100)
+            $percent = 100;
+        elseif ($percent < 0)
+            $percent = 0;
+
+        return $percent;
     }
 }
