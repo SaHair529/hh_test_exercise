@@ -19,51 +19,45 @@ use Yii;
 class Apple extends \yii\db\ActiveRecord
 {
     /**
-     * Укус яблока размером с $percent
+     * @throws Exception
      */
     public function eat($percent)
     {
         if ($this->is_on_tree) {
             $errorMsg = 'You`re not a giraffe for eat apples from the trees';
-            $this->addError('eat_error', $errorMsg);
+            $this->addError('size', $errorMsg);
             return;
         }
-        if ($this->isBad()) {
-            $errorMsg = 'You really wanna do that?';
-            $this->addError('eat_error', $errorMsg);
-            return;
-        }
-
-        if ($percent >= $this->size) {
-            $this->delete();
-            return;
-        }
-
         $this->size -= $percent;
         $this->save();
     }
 
-    /**
-     * Падение на землю
-     */
     public function fallToGround()
     {
-        if ($this->is_on_tree) return; # уже на земле
         $this->is_on_tree = 0;
         $this->fell_at = date('Y-m-d H:i:s', time());
         $this->save();
     }
 
     /**
-     * Определение состояния яблока по времени падения на землю
-     * Если прошло больше 5 часов - испорчено
+     * {@inheritdoc}
      */
-    public function isBad()
+    public static function tableName()
     {
-        if ($this->fell_at === null)
-            return false;
+        return 'apple';
+    }
 
-        return ((time() - strtotime($this->fell_at)) >= 18000);
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['color'], 'required'],
+            [['created_at'], 'safe'],
+            [['size', 'is_on_tree', 'is_bad'], 'integer'],
+            [['color'], 'string', 'max' => 10],
+        ];
     }
 
     /**
